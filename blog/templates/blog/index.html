@@ -1,0 +1,238 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Blog App  </title>
+  <style>
+    img{height: 200px;}
+    h2{display: inline;}
+    p{display: inline;}
+  </style>
+</head>
+<body>
+
+
+  <div class="allblogs">
+    <input type=submit value="My Blogs" id="my_blogs" style="cursor: pointer">
+    <h1 style="text-align: center;"> All Blogs </h1>
+    <input type="submit" value="Create New Account" id="new" style="cursor: pointer"> <br>
+    <input type="submit" value="LogIn" style="cursor: pointer">
+    <hr>
+    <img src="https://cdn.pixabay.com/photo/2023/02/24/07/40/spiderman-7810368_1280.png">
+    <h2>Title</h2><br>
+    <p>dkjfsdjfsdl;fjsdl;jflsdjfldjflkadjflkjds;lkjdsl;kjsdlkjflsdkjflsdkjflskj</p>
+    
+  </div>
+
+  <div class="login">
+    <form id="login_form">
+      Username: <input type="text" placeholder="username" required> <br>
+      Password: <input type="password" placeholder="password" required> <br>
+      <input type="submit" value="login">
+    </form>
+  </div>
+
+  <div class="myblogs">
+    <h1 style="text-align: center;"> My Blogs </h1>
+    <button style="cursor: pointer;" >Log Out  </button>
+    <button style="cursor: pointer;" id="new_blog" > New Blog  </button> 
+    <button style="cursor: pointer;" id="home" > Home </button> <hr>
+  </div>
+
+  
+  <div class="register">
+    <form id="register-form">
+      Username: <input type="text" placeholder="Username" name="username" required><br>
+      Email: <input type="text" placeholder="Email" name="email" required><br>
+      Password: <input type="password" placeholder="Password" name="password" required><br>
+      <input type="submit" value="register " style="cursor: pointer"><br>
+    </form>
+  </div>
+
+  <div class="new">
+    <form id="post-form">
+      Title: <input type="text" placeholder="Title" name="title"> <br>
+      <textarea name="description"> Write Description Here.... </textarea><br>
+      Image: <input type="file" accept="image/*" name="image"><br>
+      <input type="submit" value="post"><hr>
+    </form>
+    <button style="cursor: pointer;" id="home" > Home </button>
+  </div>
+
+
+
+
+  
+  <script>
+
+    let homes= document.querySelectorAll("#home")
+    homes.forEach((home)=>{
+      home.addEventListener("click", ()=>{
+        showdiv("allblogs")
+      })
+    })
+
+    let post=document.querySelector("#post-form");
+    post.addEventListener("submit", (event)=>{
+      const posturl="https://5fd6284a-af3a-4fdf-8994-cf7705c84000-00-3u2qot3wbb3p7.sisko.replit.dev/allblog"
+
+      const formdata= new FormData()
+      formdata.append("title", post["title"].value);
+      formdata.append("description", post["description"].value,);
+      formdata.append("image", post["image"].files[0]);
+      const info={
+        method: "post",
+        headers: {
+          "Authorization": "Token 3d83db67fcbf63f086fea63a38a0bb8b4f1f1f62",
+          // "Content-Type": "application/json",
+          "X-CSRFToken": "{{csrf_token}}"
+        },
+        body: formdata
+      }
+      fetch(posturl, info)
+      .then((response)=>{return response.json()})
+      .then((value)=>{console.log(value); alert(value['message'])})
+    });
+
+    
+
+    
+
+    function showdiv(divclass){
+      // document.querySelectorAll("div").style.display="none";
+      document.querySelectorAll("div").forEach((div)=>{
+        div.style.display="none";
+      })
+      document.querySelector(`.${divclass}`).style.display="inline";
+    }
+    
+
+    
+    
+    let ok=document.querySelector("#register-form");
+    ok.addEventListener("submit", (event)=>{
+      const url= "https://5fd6284a-af3a-4fdf-8994-cf7705c84000-00-3u2qot3wbb3p7.sisko.replit.dev/register"
+      const details={
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{csrf_token}}"
+        },
+        body: JSON.stringify({
+        "username": ok["username"].value,
+        "password": ok["password"].value,
+        "email": ok["email"].value,
+        })
+      }
+
+      fetch(url, details)
+      .then((response)=>{return response.json()})
+      .then((value)=>{
+        console.log(value["token"]);
+        localStorage.setItem("token", value["token"])
+      })
+      .catch((error)=>{console.log(error)})
+      
+      
+    })
+
+    let link="https://5fd6284a-af3a-4fdf-8994-cf7705c84000-00-3u2qot3wbb3p7.sisko.replit.dev/"
+    
+
+    if(localStorage.getItem("token")!= null){
+      const url="https://5fd6284a-af3a-4fdf-8994-cf7705c84000-00-3u2qot3wbb3p7.sisko.replit.dev/allblog";
+      const need={
+        method: "get",
+        headers: {
+          "Authorization": "Token 3d83db67fcbf63f086fea63a38a0bb8b4f1f1f62",
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{csrf_token}}"
+        }
+      }
+
+      fetch(url, need)
+      .then((response)=>{return response.json()})
+      .then((value)=>{
+        console.log(value)
+        value["body"].forEach((blog)=>{
+          document.querySelector("body").style.position="relative";
+          my=document.querySelector(".allblogs");
+          const heading = document.createElement("h1");
+          heading.innerText = `${blog["id"]}) ${blog["title"]}`;
+          const img = document.createElement("img");
+          img.src = `${link}${blog["image"]}`;
+          img.style.position="absolute";
+          img.style.right="0px";
+          const p = document.createElement("p");
+          p.innerText = `${blog["description"]}`;
+          my.append(heading);
+          my.append(img);
+          my.append(p);
+
+        })
+      })
+
+      showdiv("allblogs")
+      
+    }
+    else{
+      showdiv("login")
+    }
+
+    let myBlogs=document.querySelector("#my_blogs");
+
+    myBlogs.addEventListener("click", ()=>{
+
+      data={
+        method: "get",
+        headers: {
+          "Authorization": "Token 3d83db67fcbf63f086fea63a38a0bb8b4f1f1f62",
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{csrf_token}}"
+        }
+      }
+
+      fetch("https://5fd6284a-af3a-4fdf-8994-cf7705c84000-00-3u2qot3wbb3p7.sisko.replit.dev/myblogs", data)
+      .then((response)=>{return response.json()})
+      .then((value)=>{
+        console.log(value);
+        value["body"].forEach((blog)=>{
+          document.querySelector("body").style.position="relative";
+          my=document.querySelector(".myblogs");
+          const heading = document.createElement("h1");
+          heading.innerText = `${blog["id"]}) ${blog["title"]}`;
+          const img = document.createElement("img");
+          img.src = `${link}${blog["image"]}`;
+          img.style.position="absolute";
+          img.style.right="0px";
+          const p = document.createElement("p");
+          p.innerText = `${blog["description"]}`;
+          my.append(heading);
+          my.append(img);
+          my.append(p);
+          
+        })
+      });
+      showdiv("myblogs")
+
+    })
+
+
+    document.querySelector("#new").addEventListener("click", ()=>{
+      showdiv("register");
+    })
+
+
+    let pikachu = document.querySelector("#new_blog");
+    pikachu.addEventListener("click", ()=>{
+      console.log("clicked! ")
+      showdiv("new");
+    })
+    
+  </script>
+</body>
+</html>
